@@ -5,6 +5,7 @@ using Distributions
 using SparseArrays
 using Plots
 using BlockArrays
+using DelimitedFiles
 
 N = parse(Int64, ARGS[1])
 J = parse(Float64, ARGS[2])
@@ -55,30 +56,40 @@ function create_diagram(N, J, p, r)
     return diagram
 end
 
-# all_branches_data = Matrix{Float64}[]
+function extract_data(diagram)
+    all_branches_data = Matrix{Float64}[]
 
-# for i in eachindex(diagram.child)
-#     data = diagram[i].γ.sol
-#     parameter_values = []
-#     sol_values = []
+    if J==1.0
+        ising_type = "_FM_"
+    else
+        ising_type = "_AFM_"
+    end
 
-#     for j in eachindex(data)
-#         x = norm(data[j][1])
-#         p = data[j][2]
-#         push!(parameter_values, p)
-#         push!(sol_values, x)
-#     end
-#     br_data = hcat(sort(parameter_values), sort(sol_values))
-#     push!(all_branches_data, br_data)
-# end
+    for i in eachindex(diagram.child)
+        data = diagram[i].γ.sol
+        parameter_values = []
+        sol_values = []
 
-# for i in eachindex(all_branches_data)
-#     data_to_save = all_branches_data[i]
-#     name_pattern = join(["N_", string(N), ising_type, "SW_p", string(p), "_r_", string(r)])
-#     name_pattern = replace(name_pattern, "." => "_")
-#     name = join([name_pattern, ".csv"])
-#     writedlm(name,  data_to_save, ',')
-# end
+        for j in eachindex(data)
+            x = norm(data[j][1])
+            p = data[j][2]
+            push!(parameter_values, p)
+            push!(sol_values, x)
+        end
+        br_data = hcat(sort(parameter_values), sort(sol_values))
+        push!(all_branches_data, br_data)
+    end
 
-create_diagram(N, J, p, r)
-print("It WORKS!")
+    for i in eachindex(all_branches_data)
+        data_to_save = all_branches_data[i]
+        name_pattern = join(["N_", string(N), ising_type, "SW_p_", string(p), "_r_", string(r)])
+        name_pattern = replace(name_pattern, "." => "_")
+        name = join([name_pattern, ".csv"])
+        writedlm(name,  data_to_save, ',')
+    end
+end
+
+diagram = create_diagram(N, J, p, r)
+print("Diagram was generated", "\n")
+extract_data(diagram)
+print("Data was extracted")
