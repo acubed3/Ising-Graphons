@@ -47,7 +47,7 @@ function create_diagram(N, J, p, r)
 
     opt_newton = BK.NewtonPar(tol=1e-9)
     
-    opts = BK.ContinuationPar(p_min=0.0, p_max=10.0, max_steps=500, dsmax=2.e-2, dsmin=1.e-4, ds=1.e-4,
+    opts = BK.ContinuationPar(p_min=0.0, p_max=20.0, max_steps=2000, dsmax=2.e-2, dsmin=1.e-4, ds=1.e-4,
         nev=N, newton_options=opt_newton)
 
     diagram = BK.bifurcationdiagram(prob, BK.PALC(), 2, opts, bothside=true, normC=norminf,
@@ -82,7 +82,7 @@ function extract_data(diagram)
 
     for i in eachindex(all_branches_data)
         data_to_save = all_branches_data[i]
-        name_pattern = join(["N_", string(N), ising_type, "SW_p_", string(p), "_r_", string(r)])
+        name_pattern = join(["N_", string(N), ising_type, "SW_p_", string(p), "_r_", string(r), "_br_", string(i)])
         name_pattern = replace(name_pattern, "." => "_")
         name = join([name_pattern, ".csv"])
         writedlm(name,  data_to_save, ',')
