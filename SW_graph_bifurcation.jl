@@ -79,7 +79,7 @@ function extract_data(diagram)
         if !(bp in bif_points)
             push!(bif_points, bp)
             filtered = filter(elem -> elem.p > bp, diagram[i].γ.sol)
-            bp_solution_vector = filtered.x
+            bp_solution_vector = filtered[1].x
             bp_sol_vector_name = replace("$(base_name)_bp_$(bp)","." => "_")
             writedlm("$(bp_sol_vector_name).csv", bp_solution_vector) 
         end
@@ -95,4 +95,4 @@ end
 diagram = create_diagram(N, J, p, r, P_MIN, P_MAX)
 print("Diagram was generated", "\n")
 extract_data(diagram)
-print("Data was extracted")
+print("Data was extracted", "\n")
