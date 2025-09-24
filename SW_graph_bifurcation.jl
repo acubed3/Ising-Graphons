@@ -78,7 +78,7 @@ function extract_data(diagram)
 
         if !(bp in bif_points)
             push!(bif_points, bp)
-            bp_solution_vector = first(sort(diagram[i].γ.sol), by = Z -> Z.x, rev=true).x
+            bp_solution_vector = first(sort!(diagram[i].γ.sol, by = Z -> Z.x, rev=true)).x
             bp_sol_vector_name = replace("$(base_name)_bp_$(bp)","." => "_")
             writedlm("$(bp_sol_vector_name).csv", bp_solution_vector) 
         end
