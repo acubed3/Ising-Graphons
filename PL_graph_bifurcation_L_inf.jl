@@ -8,43 +8,37 @@ using DelimitedFiles
 
 N = parse(Int64, ARGS[1])
 J = parse(Float64, ARGS[2])
-p = parse(Float64, ARGS[3])
-r = parse(Float64, ARGS[4])
-P_MIN = parse(Float64, ARGS[5])
-P_MAX = parse(Float64, ARGS[6])
+alpha = parse(Float64, ARGS[3])
+P_MIN = parse(Float64, ARGS[4])
+P_MAX = parse(Float64, ARGS[5])
 
-function create_diagram(N, J, p, r, P_MIN, P_MAX)
+function create_diagram(N, J, alpha, P_MIN, P_MAX)
     
-    function sw_graphon(N, p, r)
-        dx = 1.0/N
-        x = collect(1:N)*dx.-dx/2
-
-        W = zeros(Float64,N,N);
+    function power_law_graphon(N, alpha)
+        result = zeros(Float64, N, N)
         for i in 1:N
             for j in 1:N
-                if (abs(x[i]-x[j])<r) | (abs(x[i]-x[j])>1-r)
-                    W[i,j] = (1-p)
-                else
-                    W[i,j] = p
-                end
+                # Use (i/n) instead of starting from 1/n to avoid exact zero
+                x = i/N
+                y = j/N
+                # Add small epsilon to prevent division by zero for very small values
+                result[i, j] = (max(x, 1e-10) * max(y, 1e-10))^(-alpha)
             end
         end
-
-        W_sparse = sparse(W)
-        return W_sparse
+        return result
     end
     
     dx = 1.0/N
-    W = sw_graphon(N, p, r)
+    W = power_law_graphon(N, alpha)
     u0 = zeros(Float64,N)
     beta0 = P_MIN+0.1
     
     function rhs(u, p)
         beta = p
-        return u - J * beta * dx * W * tanh.(u)
+        return u - tanh.(J * beta * dx * W * u)
     end
     
-    prob = BK.BifurcationProblem(rhs, u0, beta0) # norm(u)
+    prob = BK.BifurcationProblem(rhs, u0, beta0, record_from_solution = (u,beta; k...) -> norm(u, Inf))
 
     opt_newton = BK.NewtonPar(tol=1e-9)
     
@@ -66,7 +60,7 @@ function extract_data(diagram)
 
     for i in eachindex(diagram.child)
 
-        base_name = "N_$(N)$(ising_type)SW_p_$(p)_r_$(r)_br_$(i)"
+        base_name = "PL_N_$(N)$(ising_type)_alpha_$(alpha)_br_$(i)"
         base_name = replace(base_name, "." => "_")
         parameter_values = sort(diagram[i].γ.param)
         solution_norm = sort(diagram[i].γ.x)
@@ -77,20 +71,21 @@ function extract_data(diagram)
 
         if !(bp in bif_points)
             push!(bif_points, bp)
-            bp_solution_vector = first(sort!(diagram[i].γ.sol, by = Z -> Z.x, rev=true)).x
+			filtered_sols = filter(elem -> elem.p > bp, diagram[i].γ.sol)
+            bp_solution_vector = first(sort(filtered_sols, by= X -> X.p)).x;
             bp_sol_vector_name = replace("$(base_name)_bp_$(bp)","." => "_")
             writedlm("$(bp_sol_vector_name).csv", bp_solution_vector) 
         end
     end
 
-    bp_name = "BP_N_$(N)$(ising_type)SW_p_$(p)_r_$(r)"
+    bp_name = "PL_BP_N_$(N)$(ising_type)_alpha_$(alpha)"
     bp_name = replace(bp_name, "." => "_")
 	writedlm("$(bp_name).csv", bif_points, ',')
 	
 end
 
-@show(N, J, p, r, P_MIN, P_MAX)
-diagram = create_diagram(N, J, p, r, P_MIN, P_MAX)
+@show(N, J, alpha, P_MIN, P_MAX)
+diagram = create_diagram(N, J, alpha, P_MIN, P_MAX)
 print("Diagram was generated", "\n")
 extract_data(diagram)
 print("Data was extracted", "\n")

@@ -41,10 +41,10 @@ function create_diagram(N, J, p, r, P_MIN, P_MAX)
     
     function rhs(u, p)
         beta = p
-        return u - J * beta * dx * W * tanh.(u)
+        return u - tanh.(J * beta * dx * W * u)
     end
     
-    prob = BK.BifurcationProblem(rhs, u0, beta0) # norm(u)
+    prob = BK.BifurcationProblem(rhs, u0, beta0, record_from_solution = (u,beta; k...) -> norm(u, Inf))
 
     opt_newton = BK.NewtonPar(tol=1e-9)
     
@@ -77,7 +77,8 @@ function extract_data(diagram)
 
         if !(bp in bif_points)
             push!(bif_points, bp)
-            bp_solution_vector = first(sort!(diagram[i].γ.sol, by = Z -> Z.x, rev=true)).x
+			filtered_sols = filter(elem -> elem.p > bp, diagram[i].γ.sol)
+            bp_solution_vector = first(sort(filtered_sols, by= X -> X.p)).x;
             bp_sol_vector_name = replace("$(base_name)_bp_$(bp)","." => "_")
             writedlm("$(bp_sol_vector_name).csv", bp_solution_vector) 
         end
