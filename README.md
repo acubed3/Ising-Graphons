@@ -27,9 +27,9 @@ This diagram is parsed and finally the line
 Data was extracted
 ```
 appears, which means that `*.csv` datasets are created successfully. The structure of datasets is as follows:
-* For each `i`-th branch, the `*.csv*` file with name `..._br_i_...csv` is created. This file contain `(beta, solution_norm)` array
+* For each `i`-th branch, the `*.csv*` file with name `..._br_i_...csv` is created. This file contains `(beta, solution_norm)` array
 * All bifurcation points are collected to file with name `BP_....csv`
-* Explicit solutions that appears after crossing the bifurcation points are collected in files with names `_bp_...csv`
+* Explicit solutions that appear after crossing the bifurcation points are collected in files with names `_bp_...csv`
 All these datasets can be proccessed in any library, which can read `*.csv`, like `pandas`
 
 ## Monte-Carlo simulations
