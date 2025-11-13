@@ -1,7 +1,7 @@
 # Ising model and graphons
 
 This repository contains the Julia code for:
-* Analyze bifurcations of the self-consistency equations with help of `BifurcationKit`
+* Analyze bifurcations of the self-consistency equation with help of `BifurcationKit`
 * Perform Monte-Carlo simulations
 
 ## Generation of bifurcation diagrams
