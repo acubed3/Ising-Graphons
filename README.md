@@ -33,6 +33,4 @@ appears, which means that `*.csv` datasets are created successfully. The structu
 All these datasets can be proccessed in any library, which can read `*.csv`, like `pandas`
 
 ## Monte-Carlo simulations
-
-* Details of simulations are described in `*.pdf` file in this repo
 * All the simulations can be done with help of Jupyter notebook (`*.ipynb` file)
